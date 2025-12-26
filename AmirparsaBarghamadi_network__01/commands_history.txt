@@ -1,0 +1,315 @@
+# first scenario 
+
+echo "interfaces:" > network_info.txt
+ip -o link show | awk -F': ' '{print $2}' >> network_info.txt
+
+echo -e "\nIP addresses:" >> network_info.txt
+ip -4 -o addr show scope global | awk '{print $2, $4}' >> network_info.txt
+
+echo -e "\ndefault gateway:" >> network_info.txt
+ip route show default | awk '{print $3}' >> network_info.txt
+
+echo -e "\nDNS servers:" >> network_info.txt
+grep -E '^\s*nameserver' /etc/resolv.conf | awk '{print $2}' >> network_info.txt
+
+# ===============second======================
+
+sudo nano /etc/netplan/01-netcfg.yaml
+
+# paste this in nano editor:
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses:
+        - 192.168.1.100/24
+      routes:
+        - to: default
+          via: 192.168.1.1
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 1.1.1.1
+
+sudo netplan try  #just for temporart
+
+#=======================third========================
+
+nano test_connectivity.sh
+
+
+#!/bin/bash
+
+
+{
+  echo " ping 8.8.8.8 "
+  ping -c 5 8.8.8.8
+
+  echo
+  echo " ping google.com "
+  ping -c 5 google.com
+
+  echo
+  echo " DNS for github.con"
+  nslookup github.com
+} > connectivity_report.txt
+
+chmod +x test_connectivity.sh
+./test_connectivity.sh
+# ================== fourth ================
+
+echo "== TCP listen ports ==" > ports_status.txt
+ss -ltn >> ports_status.txt
+
+echo -e "\n== TCP stabilishef connections ==" >> ports_status.txt
+ss -tn state established >> ports_status.txt
+
+echo -e "\n== processes listening on 80 and 443 ==" >> ports_status.txt
+sudo ss -ltnp | grep -E ':(80|443)\s' >> ports_status.txt
+
+
+######################## scenario2 ##########################
+
+#================ first =============================
+
+ip link
+
+sudo timeout 30 tcpdump -i eth0 -nn -s 0 tcp port 80 -w http_capture.pcap
+
+sudo tcpdump -i eth0 -nn -s 0 -U 'port 53' -c 50 -w dns_capture.pcap
+
+echo "== HTTP summary ==" > tcpdump_analysis.txt
+tcpdump -nn -r http_capture.pcap | head -n 80 >> tcpdump_analysis.txt
+
+echo -e "\n== DNS summary ==" >> tcpdump_analysis.txt
+tcpdump -nn -vv -r dns_capture.pcap | head -n 120 >> tcpdump_analysis.txt
+
+#=============== second =======================
+
+sudo apt update
+sudo apt install -y tshark
+
+
+tshark -v
+
+
+echo "Wireshark Analysis (CLI - tshark)" >> wireshark_analysis.txt
+echo "DNS: dns_capture.pcap | HTTP: http_capture.pcap" >> wireshark_analysis.txt
+echo "--------------------------------------------" >> wireshark_analysis.txt
+echo "" >> wireshark_analysis.txt
+
+
+
+echo "1) TCP connections established (tcp.stream count):" >> wireshark_analysis.txt
+tshark -r http_capture.pcap -T fields -e tcp.stream 2>/dev/null | sort -n | uniq | wc -l >> wireshark_analysis.txt
+echo "" >> wireshark_analysis.txt
+
+
+
+echo "2) Total DNS queries:" >> wireshark_analysis.txt
+tshark -r dns_capture.pcap -Y "dns.flags.response==0 && dns.qry.name" -T fields -e dns.qry.name 2>/dev/null | sed '/^$/d' | wc -l >> wireshark_analysis.txt
+echo "" >> wireshark_analysis.txt
+
+echo "2) DNS queried domains (count domain):" >> wireshark_analysis.txt
+tshark -r dns_capture.pcap -Y "dns.flags.response==0 && dns.qry.name" -T fields -e dns.qry.name 2>/dev/null \
+| sed '/^$/d' | sort | uniq -c | sort -nr >> wireshark_analysis.txt
+echo "" >> wireshark_analysis.txt
+
+
+
+echo "3) TCP retransmission counts:" >> wireshark_analysis.txt
+
+echo -n "tcp.analysis.retransmission: " >> wireshark_analysis.txt
+tshark -r http_capture.pcap -Y "tcp.analysis.retransmission" 2>/dev/null | wc -l >> wireshark_analysis.txt
+
+echo -n "tcp.analysis.fast_retransmission: " >> wireshark_analysis.txt
+tshark -r http_capture.pcap -Y "tcp.analysis.fast_retransmission" 2>/dev/null | wc -l >> wireshark_analysis.txt
+
+echo "" >> wireshark_analysis.txt
+
+
+echo "4) Average RTT (tcp.analysis.ack_rtt):" >> wireshark_analysis.txt
+tshark -r http_capture.pcap -Y "tcp.analysis.ack_rtt" -T fields -e tcp.analysis.ack_rtt 2>/dev/null \
+| awk 'NF{sum+=$1; n++} END{if(n>0) printf("%.6f s (%d samples)\n", sum/n, n); else print "N/A"}' >> wireshark_analysis.txt
+echo "" >> wireshark_analysis.txt
+
+
+#====================third =========================
+
+
+sudo apt install -y telnet
+
+
+nano port_check.sh
+
+#!/bin/bash
+
+
+{
+  echo "port 80 "
+  timeout 3 telnet localhost 80
+
+  echo
+  echo "Port 22 "
+  timeout 3 telnet localhost 22
+
+  echo
+  echo "Port 3306 "
+  timeout 3 telnet localhost 3306
+} > port_check_report.txt
+
+
+chmod +x port_check.sh
+./port_check.sh
+
+
+######################## scenario3 ##########################
+
+
+#================= first =========================
+
+nano setup_firewall.sh
+
+
+#!/bin/bash
+
+sudo ufw --force reset
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow from 192.168.1.0/24 to any port 22 proto tcp
+
+sudo ufw --force enable
+sudo ufw status numbered > firewall_rules.txt
+
+
+chmod +x setup_firewall.sh
+./setup_firewall.sh
+cat firewall_rules.txt
+
+
+#====================== second =========================
+
+
+nano monitor_suspicious.sh
+
+
+#!/bin/bash
+
+
+echo "1 - more than 100 connections :" > security_report.txt
+sudo netstat -ntu | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr | awk '$1>100' >> security_report.txt
+
+echo "" >> security_report.txt
+echo "2 -  SSH failed password :" >> security_report.txt
+sudo grep "Failed password" /var/log/auth.log >> security_report.txt
+
+echo "" >> security_report.txt
+echo "3 - non ordinary ips :" >> security_report.txt
+sudo netstat -ntu | awk '$4 ~ />10000/ {print $5, "->", $4}' >> security_report.txt
+
+
+
+######################## scenario4 ##########################
+
+
+
+#============= first ========================
+
+
+sudo nano /etc/hosts
+
+add this after last line:
+192.168.1.10  app.local
+192.168.1.11  db.local
+192.168.1.12  cache.local
+
+
+sudo nano /etc/systemd/resolved.conf
+sudo systemctl restart systemd-resolved
+
+
+
+echo "== /etc/hosts ==" > dns_config.txt
+tail -n 10 /etc/hosts >> dns_config.txt
+
+echo -e "\n== DNS resolvectl status ==" >> dns_config.txt
+resolvectl status >> dns_config.txt
+
+echo -e "\n== ping app.local ==" >> dns_config.txt
+ping -c 3 app.local >> dns_config.txt
+
+echo -e "\n== nslookup google ==" >> dns_config.txt
+nslookup google.com >> dns_config.txt
+
+
+
+#=================== second ===============
+
+
+ip route show > routing_analysis.txt
+
+
+echo -e "\n== route -n ==" >> routing_analysis.txt
+route -n >> routing_analysis.txt
+
+echo -e "\n== traceroute 8.8.8.8 ==" >> routing_analysis.txt
+traceroute 8.8.8.8 >> routing_analysis.txt
+
+echo -e "\n== Router explanation ==" >> routing_analysis.txt
+echo " main router usage is routing ( find best path to transfer datas) it has table routing and worked in third layer of network. " >> routing_analysis.txt
+
+
+######################## scenario5 ##########################
+
+#================ first ====================
+
+sudo netstat -tulnp >> netstat_protpcols.txt
+
+
+#================ second =================== 
+
+ sudo apt install iperf3 
+
+nano network_performance.sh
+
+
+#!/bin/bash
+# سوال 12
+
+echo "performance report" > performance_report.txt
+date >> performance_report.txt
+echo "" >> performance_report.txt
+
+echo "bandwidth tcp iperf3" >> performance_report.txt
+iperf3 -s -D >> performance_report.txt 2>&1
+iperf3 -c 127.0.0.1 -t 10 >> performance_report.txt 2>&1
+echo "" >> performance_report.txt
+
+echo "latency jitter packet loss ping" >> performance_report.txt
+ping -c 20 127.0.0.1 > ping_out.txt 2>&1
+cat ping_out.txt >> performance_report.txt
+
+echo "" >> performance_report.txt
+echo "ping summary" >> performance_report.txt
+grep -E "rtt|round-trip" ping_out.txt | awk -F'=' '{print $2}' | awk '{print $1}' | awk -F'/' '{print "latency avg ms: " $2 "\njitter mdev ms: " $4}' >> performance_report.txt
+grep "packet loss" ping_out.txt | awk -F',' '{print "packet loss: " $3}' >> performance_report.txt
+echo "" >> performance_report.txt
+
+echo "udp jitter packet loss iperf3" >> performance_report.txt
+iperf3 -c 127.0.0.1 -u -b 100M -t 10 > udp_out.txt 2>&1
+cat udp_out.txt >> performance_report.txt
+
+echo "" >> performance_report.txt
+echo "udp summary" >> performance_report.txt
+grep "receiver" udp_out.txt | tail -n 1 | awk '{print "udp jitter: " $(NF-4) " " $(NF-3) "\nudp lost total: " $(NF-2) "\nudp loss: " $(NF-1)}' >> performance_report.txt
+echo "" >> performance_report.txt
+
+pkill -f "iperf3 -s" >> performance_report.txt 2>&1
+echo "saved in performance_report.txt" >> performance_report.txt
+

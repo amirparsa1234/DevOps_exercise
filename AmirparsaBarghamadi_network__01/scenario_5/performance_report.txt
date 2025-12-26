@@ -1,0 +1,69 @@
+bandwidth tcp iperf3
+Connecting to host 127.0.0.1, port 5201
+[  5] local 127.0.0.1 port 51942 connected to 127.0.0.1 port 5201
+[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
+[  5]   0.00-1.00   sec  6.37 GBytes  54.7 Gbits/sec    0   1.19 MBytes       
+[  5]   1.00-2.00   sec  6.72 GBytes  57.8 Gbits/sec    0   1.19 MBytes       
+[  5]   2.00-3.00   sec  6.51 GBytes  55.9 Gbits/sec    0   1.25 MBytes       
+[  5]   3.00-4.00   sec  6.64 GBytes  57.0 Gbits/sec    0   1.25 MBytes       
+[  5]   4.00-5.00   sec  6.43 GBytes  55.2 Gbits/sec    0   1.37 MBytes       
+[  5]   5.00-6.00   sec  6.69 GBytes  57.4 Gbits/sec    1   1.37 MBytes       
+[  5]   6.00-7.00   sec  6.64 GBytes  57.0 Gbits/sec    0   1.37 MBytes       
+[  5]   7.00-8.00   sec  6.50 GBytes  55.8 Gbits/sec    0   1.37 MBytes       
+[  5]   8.00-9.00   sec  6.59 GBytes  56.6 Gbits/sec    0   1.37 MBytes       
+[  5]   9.00-10.01  sec  6.68 GBytes  57.0 Gbits/sec    0   1.37 MBytes       
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-10.01  sec  65.9 GBytes  56.5 Gbits/sec    1             sender
+[  5]   0.00-10.01  sec  65.9 GBytes  56.5 Gbits/sec                  receiver
+
+iperf Done.
+
+latency jitter packet loss ping
+PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.123 ms
+64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.074 ms
+64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.079 ms
+64 bytes from 127.0.0.1: icmp_seq=4 ttl=64 time=0.030 ms
+64 bytes from 127.0.0.1: icmp_seq=5 ttl=64 time=0.073 ms
+64 bytes from 127.0.0.1: icmp_seq=6 ttl=64 time=0.078 ms
+64 bytes from 127.0.0.1: icmp_seq=7 ttl=64 time=0.074 ms
+64 bytes from 127.0.0.1: icmp_seq=8 ttl=64 time=0.037 ms
+64 bytes from 127.0.0.1: icmp_seq=9 ttl=64 time=0.074 ms
+64 bytes from 127.0.0.1: icmp_seq=10 ttl=64 time=0.072 ms
+64 bytes from 127.0.0.1: icmp_seq=11 ttl=64 time=0.082 ms
+64 bytes from 127.0.0.1: icmp_seq=12 ttl=64 time=0.130 ms
+64 bytes from 127.0.0.1: icmp_seq=13 ttl=64 time=0.062 ms
+64 bytes from 127.0.0.1: icmp_seq=14 ttl=64 time=0.076 ms
+64 bytes from 127.0.0.1: icmp_seq=15 ttl=64 time=0.071 ms
+64 bytes from 127.0.0.1: icmp_seq=16 ttl=64 time=0.036 ms
+64 bytes from 127.0.0.1: icmp_seq=17 ttl=64 time=0.079 ms
+64 bytes from 127.0.0.1: icmp_seq=18 ttl=64 time=0.076 ms
+64 bytes from 127.0.0.1: icmp_seq=19 ttl=64 time=0.077 ms
+64 bytes from 127.0.0.1: icmp_seq=20 ttl=64 time=0.035 ms
+
+--- 127.0.0.1 ping statistics ---
+20 packets transmitted, 20 received, 0% packet loss, time 19764ms
+rtt min/avg/max/mdev = 0.030/0.071/0.130/0.024 ms
+
+udp test jitter and packet loss iperf3
+Connecting to host 127.0.0.1, port 5201
+[  5] local 127.0.0.1 port 42137 connected to 127.0.0.1 port 5201
+[ ID] Interval           Transfer     Bitrate         Total Datagrams
+[  5]   0.00-1.00   sec  11.9 MBytes   100 Mbits/sec  382  
+[  5]   1.00-2.00   sec  11.9 MBytes  99.9 Mbits/sec  381  
+[  5]   2.00-3.00   sec  11.9 MBytes   100 Mbits/sec  382  
+[  5]   3.00-4.00   sec  11.9 MBytes  99.9 Mbits/sec  381  
+[  5]   4.00-5.00   sec  11.9 MBytes   100 Mbits/sec  382  
+[  5]   5.00-6.00   sec  11.9 MBytes  99.9 Mbits/sec  381  
+[  5]   6.00-7.00   sec  11.9 MBytes  99.9 Mbits/sec  381  
+[  5]   7.00-8.00   sec  11.9 MBytes   100 Mbits/sec  382  
+[  5]   8.00-9.00   sec  11.9 MBytes  99.9 Mbits/sec  381  
+[  5]   9.00-10.00  sec  11.9 MBytes   100 Mbits/sec  382  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-10.00  sec   119 MBytes   100 Mbits/sec  0.000 ms  0/3815 (0%)  sender
+[  5]   0.00-10.00  sec   119 MBytes   100 Mbits/sec  0.014 ms  0/3815 (0%)  receiver
+
+iperf Done.
+saved in performance_report.txt

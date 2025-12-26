@@ -1,0 +1,16 @@
+interfaces:
+lo
+eth0
+docker0
+vethf663c55@if2
+
+IP addresses:
+lo 10.255.255.254/32
+eth0 172.24.19.26/20
+docker0 172.17.0.1/16
+
+default gateway:
+172.24.16.1
+
+DNS servers:
+10.255.255.254

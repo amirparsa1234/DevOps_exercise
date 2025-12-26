@@ -1,0 +1,6 @@
+1 - more than 100 connections :
+
+2 -  SSH failed password :
+2025-12-19T22:11:51.155061+03:30 DESKTOP-7UO0R79 sudo:     root : TTY=pts/2 ; PWD=/home/a/exam_results/network1/scenario3 ; USER=root ; COMMAND=/usr/bin/grep 'Failed password' /var/log/auth.log
+
+3 - non ordinary ips :

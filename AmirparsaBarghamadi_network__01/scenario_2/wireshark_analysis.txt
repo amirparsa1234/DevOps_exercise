@@ -1,0 +1,21 @@
+Wireshark Analysis (CLI - tshark)
+DNS: dns_capture.pcap | HTTP: http_capture.pcap
+--------------------------------------------
+
+1) TCP connections established (tcp.stream count):
+1
+
+2) Total DNS queries:
+25
+
+2) DNS queried domains (count domain):
+     19 google.com
+      6 github.com
+
+3) TCP retransmission counts:
+tcp.analysis.retransmission: 0
+tcp.analysis.fast_retransmission: 0
+
+4) Average RTT (tcp.analysis.ack_rtt):
+0.013776 s (6 samples)
+

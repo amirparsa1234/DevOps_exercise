@@ -1,0 +1,14 @@
+port 80 :
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+
+port 22 :
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+
+port 3306 
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
