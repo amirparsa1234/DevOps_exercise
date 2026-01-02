@@ -1,0 +1,25 @@
+FTP setup guide
+
+Goal:
+- install vsftpd
+- anonymous login (read)
+- local user (ftpuser)
+
+Run:
+1) see config:
+   cat vsftpd.conf
+
+2) run setup:
+   ./setup_ftp.sh
+
+Files:
+- main config:
+  /etc/vsftpd.conf
+- anonymous folder:
+  /srv/ftp/anonymous
+
+Quick check:
+- service:
+  sudo systemctl status vsftpd
+- port:
+  ss -lntu | grep :21

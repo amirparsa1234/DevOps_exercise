@@ -1,0 +1,15 @@
+HTTPS server test
+
+Start server:
+  python3 https_server.py
+
+Test command:
+  curl -k -i --connect-timeout 3 --max-time 5 https://localhost:8443
+
+Captured output (first lines):
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8443 after 1 ms: Couldn't connect to server

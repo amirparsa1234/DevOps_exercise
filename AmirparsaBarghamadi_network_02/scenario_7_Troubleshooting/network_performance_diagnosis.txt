@@ -1,0 +1,90 @@
+Network performance diagnosis
+Fri Jan  2 22:46:12 +0330 2026
+
+Ping 8.8.8.8 (10)
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=107 time=72.4 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=107 time=67.9 ms
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=107 time=68.3 ms
+64 bytes from 8.8.8.8: icmp_seq=4 ttl=107 time=69.4 ms
+64 bytes from 8.8.8.8: icmp_seq=5 ttl=107 time=81.6 ms
+64 bytes from 8.8.8.8: icmp_seq=6 ttl=107 time=71.1 ms
+64 bytes from 8.8.8.8: icmp_seq=7 ttl=107 time=71.6 ms
+64 bytes from 8.8.8.8: icmp_seq=8 ttl=107 time=83.3 ms
+64 bytes from 8.8.8.8: icmp_seq=9 ttl=107 time=74.7 ms
+64 bytes from 8.8.8.8: icmp_seq=10 ttl=107 time=75.3 ms
+
+--- 8.8.8.8 ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 8994ms
+rtt min/avg/max/mdev = 67.884/73.553/83.253/5.024 ms
+
+Ping 1.1.1.1 (10)
+PING 1.1.1.1 (1.1.1.1) 56(84) bytes of data.
+64 bytes from 1.1.1.1: icmp_seq=1 ttl=46 time=126 ms
+64 bytes from 1.1.1.1: icmp_seq=2 ttl=46 time=128 ms
+64 bytes from 1.1.1.1: icmp_seq=3 ttl=46 time=126 ms
+64 bytes from 1.1.1.1: icmp_seq=4 ttl=46 time=127 ms
+64 bytes from 1.1.1.1: icmp_seq=5 ttl=46 time=127 ms
+64 bytes from 1.1.1.1: icmp_seq=6 ttl=46 time=125 ms
+64 bytes from 1.1.1.1: icmp_seq=7 ttl=46 time=129 ms
+64 bytes from 1.1.1.1: icmp_seq=8 ttl=46 time=128 ms
+64 bytes from 1.1.1.1: icmp_seq=9 ttl=46 time=129 ms
+64 bytes from 1.1.1.1: icmp_seq=10 ttl=46 time=131 ms
+
+--- 1.1.1.1 ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 8994ms
+rtt min/avg/max/mdev = 124.503/127.493/131.215/1.855 ms
+
+DNS test (dig google.com)
+
+; <<>> DiG 9.18.39-0ubuntu0.24.04.2-Ubuntu <<>> google.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 3163
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;google.com.			IN	A
+
+;; ANSWER SECTION:
+google.com.		115	IN	A	142.250.186.110
+
+;; Query time: 151 msec
+;; SERVER: 10.255.255.254#53(10.255.255.254) (UDP)
+;; WHEN: Fri Jan 02 22:46:32 +0330 2026
+;; MSG SIZE  rcvd: 55
+
+
+Routes
+default via 172.24.16.1 dev eth0 proto kernel 
+172.24.16.0/20 dev eth0 proto kernel scope link src 172.24.19.26 
+
+Interfaces
+lo               UNKNOWN        127.0.0.1/8 10.255.255.254/32 ::1/128 
+eth0             UP             172.24.19.26/20 fe80::215:5dff:fee9:fc4b/64 
+
+MTU quick check (may fail)
+PING 8.8.8.8 (8.8.8.8) 1472(1500) bytes of data.
+1480 bytes from 8.8.8.8: icmp_seq=1 ttl=107 time=84.6 ms
+1480 bytes from 8.8.8.8: icmp_seq=2 ttl=107 time=91.4 ms
+
+--- 8.8.8.8 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 999ms
+rtt min/avg/max/mdev = 84.589/87.995/91.401/3.406 ms
+
+Traceroute 8.8.8.8 (if available)
+traceroute to 8.8.8.8 (8.8.8.8), 10 hops max, 60 byte packets
+ 1  172.24.16.1 (172.24.16.1)  1.096 ms  1.028 ms  1.325 ms
+ 2  192.168.1.1 (192.168.1.1)  4.888 ms  3.684 ms  4.988 ms
+ 3  192.168.0.254 (192.168.0.254)  5.410 ms  5.410 ms  5.353 ms
+ 4  172.17.65.149 (172.17.65.149)  30.082 ms  57.552 ms  58.094 ms
+ 5  172.17.3.121 (172.17.3.121)  57.532 ms 172.17.3.97 (172.17.3.97)  57.684 ms 172.17.3.121 (172.17.3.121)  57.613 ms
+ 6  172.20.40.38 (172.20.40.38)  56.947 ms 172.20.40.46 (172.20.40.46)  39.582 ms 172.20.40.18 (172.20.40.18)  39.805 ms
+ 7  * 172.20.21.21 (172.20.21.21)  48.996 ms *
+ 8  * * *
+ 9  * * 10.202.6.194 (10.202.6.194)  55.189 ms
+10  10.21.212.10 (10.21.212.10)  53.869 ms  53.666 ms 10.202.6.194 (10.202.6.194)  54.761 ms
+
+Done

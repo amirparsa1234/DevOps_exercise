@@ -1,0 +1,32 @@
+Simple monitoring dashboard
+Interface: eth0
+
+Bandwidth (bytes/sec, approx):
+  RX: 0
+  TX: 0
+
+Active connections:
+1
+
+Top 5 remote IPs (by connection count):
+      1 172.24.19.26
+
+Listening ports:
+Netid      State       Recv-Q      Send-Q            Local Address:Port             Peer Address:Port      Process
+udp        UNCONN      0           0                    127.0.0.54:53                    0.0.0.0:*
+udp        UNCONN      0           0                 127.0.0.53%lo:53                    0.0.0.0:*
+udp        UNCONN      0           0                10.255.255.254:53                    0.0.0.0:*
+udp        UNCONN      0           0                     127.0.0.1:323                   0.0.0.0:*
+udp        UNCONN      0           0                         [::1]:323                      [::]:*
+tcp        LISTEN      0           4096                    0.0.0.0:22                    0.0.0.0:*
+tcp        LISTEN      0           4096              127.0.0.53%lo:53                    0.0.0.0:*
+tcp        LISTEN      0           151                   127.0.0.1:3306                  0.0.0.0:*
+tcp        LISTEN      0           4096                 127.0.0.54:53                    0.0.0.0:*
+tcp        LISTEN      0           70                    127.0.0.1:33060                 0.0.0.0:*
+tcp        LISTEN      0           1000             10.255.255.254:53                    0.0.0.0:*
+tcp        LISTEN      0           5                       0.0.0.0:8080                  0.0.0.0:*
+tcp        LISTEN      0           4096                       [::]:22                       [::]:*
+tcp        LISTEN      0           511                           *:80                          *:*
+tcp        LISTEN      0           4096                          *:5201                        *:*
+
+Refresh in 5s (Ctrl+C to stop)

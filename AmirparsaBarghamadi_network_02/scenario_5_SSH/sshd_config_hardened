@@ -1,0 +1,7 @@
+# sshd hardening sample
+
+Port 2222
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+MaxAuthTries 3

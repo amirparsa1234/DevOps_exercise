@@ -1,0 +1,12 @@
+BIND files
+
+named.conf.local:
+- defines a zone: example.local
+- says where the zone file is
+
+db.example.local:
+- zone file content
+- has SOA, NS, A, MX records
+
+SOA:
+- has serial and timing values for the zone

@@ -1,0 +1,18 @@
+SSH security
+
+What to change:
+- Change port (example 2222)
+- Disable root login
+- Disable password login (use keys)
+- Limit auth tries
+
+Why disable PasswordAuthentication:
+- Password can be guessed/brute-forced.
+- Keys are safer when protected.
+
+Why disable root login:
+- Attackers always try "root".
+- Use a normal user + sudo.
+
+How to monitor failed logins:
+  grep "Failed password" /var/log/auth.log | tail -n 20

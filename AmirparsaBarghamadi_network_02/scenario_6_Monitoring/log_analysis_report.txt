@@ -1,0 +1,51 @@
+Log analysis report
+Fri Jan  2 22:35:09 +0330 2026
+
+Log files (if exist):
+-rw-r----- 1 syslog adm 4.9K Jan  2 22:17 /var/log/auth.log
+-rw-r----- 1 syslog adm  48K Jan  2 22:12 /var/log/kern.log
+-rw-r----- 1 syslog adm 254K Jan  2 22:34 /var/log/syslog
+
+Last 10 auth.log events:
+2026-01-02T22:11:13.155615+03:30 DESKTOP-7UO0R79 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by (uid=1000)
+2026-01-02T22:11:18.631117+03:30 DESKTOP-7UO0R79 sudo: pam_unix(sudo:session): session closed for user root
+2026-01-02T22:13:01.013748+03:30 DESKTOP-7UO0R79 sshd[2504]: Accepted password for a from 172.24.16.1 port 9868 ssh2
+2026-01-02T22:13:01.017540+03:30 DESKTOP-7UO0R79 sshd[2504]: pam_unix(sshd:session): session opened for user a(uid=1000) by a(uid=0)
+2026-01-02T22:13:01.032604+03:30 DESKTOP-7UO0R79 systemd-logind[246]: New session 6 of user a.
+2026-01-02T22:14:02.093830+03:30 DESKTOP-7UO0R79 sshd[2504]: pam_unix(sshd:session): session closed for user a
+2026-01-02T22:14:02.100944+03:30 DESKTOP-7UO0R79 systemd-logind[246]: Session 6 logged out. Waiting for processes to exit.
+2026-01-02T22:14:02.102512+03:30 DESKTOP-7UO0R79 systemd-logind[246]: Removed session 6.
+2026-01-02T22:17:01.978870+03:30 DESKTOP-7UO0R79 CRON[2547]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+2026-01-02T22:17:01.983974+03:30 DESKTOP-7UO0R79 CRON[2547]: pam_unix(cron:session): session closed for user root
+
+Last 10 syslog events:
+2026-01-02T22:33:30.857308+03:30 DESKTOP-7UO0R79 wsl-pro-service[253]: #033[36mINFO#033[0m Reconnecting to Windows host in 60 seconds
+2026-01-02T22:33:30.857641+03:30 DESKTOP-7UO0R79 wsl-pro-service[253]: #033[37mDEBUG#033[0m Updated systemd status to "Not connected: waiting to retry"
+2026-01-02T22:33:43.869885+03:30 DESKTOP-7UO0R79 systemd-resolved[205]: Clock change detected. Flushing caches.
+2026-01-02T22:34:13.686992+03:30 DESKTOP-7UO0R79 systemd-resolved[205]: Clock change detected. Flushing caches.
+2026-01-02T22:34:25.955693+03:30 DESKTOP-7UO0R79 wsl-pro-service[253]: #033[36mINFO#033[0m Daemon: connecting to Windows Agent
+2026-01-02T22:34:25.955865+03:30 DESKTOP-7UO0R79 wsl-pro-service[253]: #033[37mDEBUG#033[0m Updated systemd status to "Connecting"
+2026-01-02T22:34:25.958355+03:30 DESKTOP-7UO0R79 wsl-pro-service[253]: #033[33mWARNING#033[0m Daemon: could not connect to Windows Agent: could not get address: could not read agent port file "/mnt/c/Users/programing/.ubuntupro/.address": open /mnt/c/Users/programing/.ubuntupro/.address: no such file or directory
+2026-01-02T22:34:25.958475+03:30 DESKTOP-7UO0R79 wsl-pro-service[253]: #033[36mINFO#033[0m Reconnecting to Windows host in 60 seconds
+2026-01-02T22:34:25.958529+03:30 DESKTOP-7UO0R79 wsl-pro-service[253]: #033[37mDEBUG#033[0m Updated systemd status to "Not connected: waiting to retry"
+2026-01-02T22:34:43.415176+03:30 DESKTOP-7UO0R79 systemd-resolved[205]: Clock change detected. Flushing caches.
+
+Last 10 kern.log events:
+2026-01-02T20:27:40.647110+03:30 DESKTOP-7UO0R79 kernel: misc dxg: dxgk: dxgkio_query_adapter_info: Ioctl failed: -2
+2026-01-02T20:27:40.647807+03:30 DESKTOP-7UO0R79 kernel: misc dxg: dxgk: dxgkio_query_adapter_info: Ioctl failed: -22
+2026-01-02T20:27:40.647812+03:30 DESKTOP-7UO0R79 kernel: message repeated 2 times: [ misc dxg: dxgk: dxgkio_query_adapter_info: Ioctl failed: -22]
+2026-01-02T20:27:40.647814+03:30 DESKTOP-7UO0R79 kernel: misc dxg: dxgk: dxgkio_query_adapter_info: Ioctl failed: -2
+2026-01-02T20:27:57.697373+03:30 DESKTOP-7UO0R79 kernel: nf_conntrack: default automatic helper assignment has been turned off for security reasons and CT-based firewall rule not found. Use the iptables CT target to attach helpers instead.
+2026-01-02T20:28:26.109507+03:30 DESKTOP-7UO0R79 kernel: hv_balloon: Max. dynamic memory size: 8134 MB
+2026-01-02T20:37:37.887824+03:30 DESKTOP-7UO0R79 kernel: mini_init (146): drop_caches: 1
+2026-01-02T20:38:37.918122+03:30 DESKTOP-7UO0R79 kernel: mini_init (146): drop_caches: 1
+2026-01-02T20:48:38.076937+03:30 DESKTOP-7UO0R79 kernel: mini_init (146): drop_caches: 1
+2026-01-02T22:12:09.868798+03:30 DESKTOP-7UO0R79 kernel: mini_init (146): drop_caches: 1
+
+Top IPs in auth.log (all IPs):
+      3 172.24.16.1
+      1 0.0.0.0
+
+Failed password attempts (by IP):
+
+Done

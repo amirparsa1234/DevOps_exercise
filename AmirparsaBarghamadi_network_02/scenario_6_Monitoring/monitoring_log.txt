@@ -1,0 +1,53 @@
+-----
+Fri Jan  2 22:45:59 +0330 2026
+Interface stats:
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 00:15:5d:e9:fc:4b brd ff:ff:ff:ff:ff:ff
+    RX:  bytes packets errors dropped  missed   mcast           
+       2116047    3271      0       0       0    1042 
+    TX:  bytes packets errors dropped carrier collsns           
+        351643    2073      0       0       0       0 
+Bandwidth (bytes/sec, approx):
+  RX: 0
+  TX: 0
+Active connections:
+1
+Top 5 remote IPs (by connection count):
+      1 172.24.19.26
+
+-----
+Fri Jan  2 22:46:04 +0330 2026
+Interface stats:
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 00:15:5d:e9:fc:4b brd ff:ff:ff:ff:ff:ff
+    RX:  bytes packets errors dropped  missed   mcast           
+       2116047    3271      0       0       0    1042 
+    TX:  bytes packets errors dropped carrier collsns           
+        351643    2073      0       0       0       0 
+Bandwidth (bytes/sec, approx):
+  RX: 0
+  TX: 0
+Active connections:
+1
+Top 5 remote IPs (by connection count):
+      1 172.24.19.26
+
+-----
+Fri Jan  2 22:46:09 +0330 2026
+Interface stats:
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 00:15:5d:e9:fc:4b brd ff:ff:ff:ff:ff:ff
+    RX:  bytes packets errors dropped  missed   mcast           
+       2116137    3272      0       0       0    1042 
+    TX:  bytes packets errors dropped carrier collsns           
+        351733    2074      0       0       0       0 
+Bandwidth (bytes/sec, approx):
+  RX: 18
+  TX: 18
+Active connections:
+1
+Top 5 remote IPs (by connection count):
+      1 172.24.19.26
+
+-----
+Fri Jan  2 22:46:11 +0330 2026

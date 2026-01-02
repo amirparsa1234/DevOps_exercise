@@ -1,0 +1,927 @@
+# 1
+
+cd Lastname_network_02/scenario_1_SSL
+
+cat > ssl_generation.txt <<'EOF'
+Self-signed cert for local.myapp
+
+This is for lab use.
+Files are stored in ./certs/
+EOF
+
+echo "" >> ssl_generation.txt
+echo "Generate cert..." >> ssl_generation.txt
+
+openssl req -x509 -newkey rsa:2048 -nodes \
+  -keyout certs/myapp.key \
+  -out certs/myapp.crt \
+  -days 365 \
+  -subj "/C=IR/ST=Tehran/L=Tehran/O=MyCompany/CN=local.myapp" \
+  >> ssl_generation.txt 2>&1
+
+echo "" >> ssl_generation.txt
+echo "Show cert info..." >> ssl_generation.txt
+openssl x509 -in certs/myapp.crt -noout -issuer -subject -dates >> ssl_generation.txt 2>&1
+
+echo "" >> ssl_generation.txt
+echo "Check key..." >> ssl_generation.txt
+openssl rsa -in certs/myapp.key -check -noout >> ssl_generation.txt 2>&1
+
+echo "" >> ssl_generation.txt
+echo "List files..." >> ssl_generation.txt
+ls -l certs >> ssl_generation.txt 2>&1
+
+1.2
+
+
+
+
+
+cat > test_https.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+echo "Run HTTPS test..."
+
+echo "curl headers..." > https_test_report.txt
+curl -I https://google.com >> https_test_report.txt 2>&1
+
+echo "" >> https_test_report.txt
+echo "openssl chain..." >> https_test_report.txt
+echo | openssl s_client -connect google.com:443 -servername google.com -showcerts 2>/dev/null \
+  | head -n 120 >> https_test_report.txt
+
+echo "" >> https_test_report.txt
+echo "cert dates..." >> https_test_report.txt
+echo | openssl s_client -connect google.com:443 -servername google.com 2>/dev/null \
+  | openssl x509 -noout -dates >> https_test_report.txt
+
+echo "" >> https_test_report.txt
+echo "done" >> https_test_report.txt
+echo "OK"
+EOF
+
+chmod +x test_https.sh
+./test_https.sh
+
+
+1.3
+
+
+cat > https_server.py <<'EOF'
+import http.server
+import ssl
+
+server_address = ("localhost", 8443)
+httpd = http.server.HTTPServer(server_address, http.server.SimpleHTTPRequestHandler)
+
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+context.load_cert_chain(certfile="certs/myapp.crt", keyfile="certs/myapp.key")
+
+httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
+
+print("https://localhost:8443")
+httpd.serve_forever()
+EOF
+
+
+
+ls -l certs
+head -n 2 certs/myapp.crt
+
+
+python3 https_server.py
+
+curl -k https://localhost:8443
+
+
+
+#2
+
+
+
+cat > vsftpd.conf <<'EOF'
+
+
+listen=YES
+listen_ipv6=NO
+
+anonymous_enable=YES
+anon_root=/srv/ftp/anonymous
+no_anon_password=YES
+
+local_enable=YES
+write_enable=YES
+
+chroot_local_user=YES
+allow_writeable_chroot=YES
+
+xferlog_enable=YES
+xferlog_file=/var/log/vsftpd.log
+
+ftpd_banner=FTP lab server
+EOF
+
+cat > setup_ftp.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+echo "Start FTP setup"
+
+echo "Update..."
+sudo apt update -y
+
+echo "Install vsftpd..."
+sudo apt install -y vsftpd
+
+echo "Make anonymous folder..."
+sudo mkdir -p /srv/ftp/anonymous
+sudo chmod -R 755 /srv/ftp/anonymous
+echo "hello ftp" | sudo tee /srv/ftp/anonymous/README.txt >/dev/null
+
+echo "Make user ftpuser..."
+sudo useradd -m ftpuser 2>/dev/null || true
+echo "Set password for ftpuser now"
+sudo passwd ftpuser
+
+echo "Copy config..."
+sudo cp ./vsftpd.conf /etc/vsftpd.conf
+
+echo "Restart service..."
+sudo systemctl restart vsftpd
+
+echo "Show status..."
+sudo systemctl status vsftpd --no-pager || true
+
+echo "Done"
+echo "Commands:"
+echo "  sudo systemctl start vsftpd"
+echo "  sudo systemctl stop vsftpd"
+echo "  sudo systemctl restart vsftpd"
+EOF
+
+chmod +x setup_ftp.sh
+
+cat > ftp_setup_guide.txt <<'EOF'
+FTP setup guide (simple English)
+
+Goal:
+- install vsftpd
+- anonymous login (read)
+- local user (ftpuser)
+
+Run:
+1) see config:
+   cat vsftpd.conf
+
+2) run setup:
+   ./setup_ftp.sh
+
+Files:
+- main config:
+  /etc/vsftpd.conf
+- anonymous folder:
+  /srv/ftp/anonymous
+
+Quick check:
+- service:
+  sudo systemctl status vsftpd
+- port:
+  ss -lntu | grep :21
+EOF
+
+cat > ftp_operations_guide.txt <<'EOF'
+FTP commands (simple)
+
+Connect:
+  ftp <server-ip>
+
+List:
+  ls
+
+Download:
+  get file.txt
+
+Upload (need permission):
+  put file.txt
+
+Public example:
+  ftp ftp.ubuntu.com
+
+No interactive:
+  wget ftp://ftp.ubuntu.com/ubuntu/README
+  curl ftp://ftp.ubuntu.com/ubuntu/README -o README
+EOF
+
+cat > file_transfer_comparison.md <<'EOF'
+# FTP vs SFTP vs SCP (simple)
+
+## FTP
+- old
+- usually not encrypted
+- port 21
+Example:
+```bash
+ftp ftp.ubuntu.com
+wget ftp://ftp.ubuntu.com/ubuntu/README
+
+
+
+cat <<'EOF'
+FTP vs SFTP vs SCP (simple)
+
+FTP
+- Old file transfer
+- Usually NOT encrypted
+- Port 21
+Examples:
+  ftp ftp.ubuntu.com
+  wget ftp://ftp.ubuntu.com/ubuntu/README
+
+SFTP
+- File transfer over SSH
+- Encrypted
+- Port 22
+Examples:
+  sftp user@server
+  get file.txt
+  put file.txt
+
+SCP
+- Secure copy over SSH
+- Encrypted
+- Port 22
+Examples:
+  scp file.txt user@server:/tmp/
+  scp user@server:/var/log/syslog .
+
+When to use
+- Public download mirror: FTP is ok
+- Real server / internet: use SFTP or SCP (safer)
+EOF
+
+
+
+################ 3 ####################
+
+
+====== 3.1 ============
+
+cd Lastname_network_02/scenario_3_HTTP
+
+cat > http_server.py <<'EOF'
+import http.server
+import socketserver
+
+PORT = 8080
+
+class Handler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = b"""<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>HTTP Lab</title></head>
+<body>
+<h1>It works</h1>
+<p>Simple HTTP page on port 8080.</p>
+</body>
+</html>
+"""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    print("http://localhost:8080")
+    httpd.serve_forever()
+EOF
+
+cat > http_server_guide.txt <<'EOF'
+HTTP server guide (simple)
+
+Start server:
+  python3 http_server.py
+
+Test:
+  curl -i http://localhost:8080
+
+Stop:
+  Ctrl + C
+EOF
+
+
+============ 3.2 ===========
+
+
+
+
+cat > test_http_methods.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+echo "Start HTTP methods test" > http_methods_report.txt
+
+echo "" >> http_methods_report.txt
+echo "GET..." >> http_methods_report.txt
+curl --connect-timeout 5 --max-time 15 -i -X GET https://jsonplaceholder.typicode.com/posts/1 >> http_methods_report.txt 2>&1
+
+echo "" >> http_methods_report.txt
+echo "POST..." >> http_methods_report.txt
+curl --connect-timeout 5 --max-time 15 -i -X POST https://jsonplaceholder.typicode.com/posts \
+  -H "Content-Type: application/json" \
+  -d '{"title":"test","body":"content","userId":1}' >> http_methods_report.txt 2>&1
+
+echo "" >> http_methods_report.txt
+echo "PUT..." >> http_methods_report.txt
+curl --connect-timeout 5 --max-time 15 -i -X PUT https://jsonplaceholder.typicode.com/posts/1 \
+  -H "Content-Type: application/json" \
+  -d '{"id":1,"title":"updated","body":"new","userId":1}' >> http_methods_report.txt 2>&1
+
+echo "" >> http_methods_report.txt
+echo "DELETE..." >> http_methods_report.txt
+curl --connect-timeout 5 --max-time 15 -i -X DELETE https://jsonplaceholder.typicode.com/posts/1 >> http_methods_report.txt 2>&1
+
+echo "" >> http_methods_report.txt
+echo "Done" >> http_methods_report.txt
+EOF
+
+chmod +x test_http_methods.sh
+./test_http_methods.sh
+
+
+===== ===== 3.3 ===============
+
+
+cd Lastname_network_02/scenario_3_HTTP
+
+echo "Header test output" > http_headers_analysis.txt
+echo "" >> http_headers_analysis.txt
+
+echo "== github.com ==" >> http_headers_analysis.txt
+curl -I https://github.com >> http_headers_analysis.txt 2>&1
+echo "" >> http_headers_analysis.txt
+
+echo "== google.com ==" >> http_headers_analysis.txt
+curl -I https://google.com >> http_headers_analysis.txt 2>&1
+echo "" >> http_headers_analysis.txt
+
+echo "== stackoverflow.com ==" >> http_headers_analysis.txt
+curl -I https://stackoverflow.com >> http_headers_analysis.txt 2>&1
+echo "" >> http_headers_analysis.txt
+
+cat >> http_headers_analysis.txt <<'EOF'
+Notes (simple)
+
+Content-Type:
+- tells browser what content is (html, json, etc)
+
+Server:
+- shows server/proxy name (sometimes)
+- can leak info, so not always good
+
+Cache-Control:
+- tells cache rules (no-store, max-age, etc)
+- affects speed and CDN/browser cache
+
+X-Frame-Options:
+- helps stop clickjacking
+- controls iframe use (DENY / SAMEORIGIN)
+
+Content-Security-Policy:
+- security rules for scripts/styles/images
+- helps reduce XSS if configured well
+EOF
+
+
+################### 4 ################
+
+=========== 4.1 ==============
+
+
+cd Lastname_network_02/scenario_4_DNS
+
+cat > dns_records_explained.md <<'EOF'
+
+
+A
+- IPv4 address record
+- example: example.com -> 1.2.3.4
+
+AAAA
+- IPv6 address record
+
+CNAME
+- alias to another name
+- example: www.example.com -> example.com
+
+MX
+- mail server record for a domain
+
+TXT
+- text record (often for SPF/DKIM/verification)
+
+NS
+- name servers for the domain
+
+SOA
+- zone info (serial, refresh, retry, expire)
+EOF
+
+
+=============== 4.2 =====================
+
+
+cd Lastname_network_02/scenario_4_DNS
+
+cat > dns_analyzer.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+echo "DNS report" > dns_analysis_report.txt
+date >> dns_analysis_report.txt
+echo "" >> dns_analysis_report.txt
+
+echo "Domain: google.com" >> dns_analysis_report.txt
+echo "A (shows TTL too):" >> dns_analysis_report.txt
+dig google.com A +noall +answer >> dns_analysis_report.txt
+echo "NS:" >> dns_analysis_report.txt
+dig google.com NS +noall +answer >> dns_analysis_report.txt
+echo "Query time:" >> dns_analysis_report.txt
+dig google.com A | grep "Query time:" >> dns_analysis_report.txt
+echo "DNS server used:" >> dns_analysis_report.txt
+dig google.com A | grep "SERVER:" >> dns_analysis_report.txt
+echo "" >> dns_analysis_report.txt
+
+echo "Domain: github.com" >> dns_analysis_report.txt
+echo "A (shows TTL too):" >> dns_analysis_report.txt
+dig github.com A +noall +answer >> dns_analysis_report.txt
+echo "NS:" >> dns_analysis_report.txt
+dig github.com NS +noall +answer >> dns_analysis_report.txt
+echo "Query time:" >> dns_analysis_report.txt
+dig github.com A | grep "Query time:" >> dns_analysis_report.txt
+echo "DNS server used:" >> dns_analysis_report.txt
+dig github.com A | grep "SERVER:" >> dns_analysis_report.txt
+echo "" >> dns_analysis_report.txt
+
+echo "Domain: stackoverflow.com" >> dns_analysis_report.txt
+echo "A (shows TTL too):" >> dns_analysis_report.txt
+dig stackoverflow.com A +noall +answer >> dns_analysis_report.txt
+echo "NS:" >> dns_analysis_report.txt
+dig stackoverflow.com NS +noall +answer >> dns_analysis_report.txt
+echo "Query time:" >> dns_analysis_report.txt
+dig stackoverflow.com A | grep "Query time:" >> dns_analysis_report.txt
+echo "DNS server used:" >> dns_analysis_report.txt
+dig stackoverflow.com A | grep "SERVER:" >> dns_analysis_report.txt
+echo "" >> dns_analysis_report.txt
+
+echo "Domain: linkedin.com" >> dns_analysis_report.txt
+echo "A (shows TTL too):" >> dns_analysis_report.txt
+dig linkedin.com A +noall +answer >> dns_analysis_report.txt
+echo "NS:" >> dns_analysis_report.txt
+dig linkedin.com NS +noall +answer >> dns_analysis_report.txt
+echo "Query time:" >> dns_analysis_report.txt
+dig linkedin.com A | grep "Query time:" >> dns_analysis_report.txt
+echo "DNS server used:" >> dns_analysis_report.txt
+dig linkedin.com A | grep "SERVER:" >> dns_analysis_report.txt
+echo "" >> dns_analysis_report.txt
+
+echo "Done" >> dns_analysis_report.txt
+EOF
+
+chmod +x dns_analyzer.sh
+./dns_analyzer.sh
+
+
+
+
+==================== 4.3 =====================
+
+
+cat > cdn_explanation.md <<'EOF'
+
+
+CDN = many servers in many places.
+
+Goal:
+- faster load for users
+- less load on the main server (origin)
+
+Origin:
+- the main server (real source)
+
+Edge:
+- CDN server close to user
+- can cache files
+
+Quick check (example):
+curl -I https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js
+
+In headers you may see:
+- via
+- age
+- x-cache
+- cf-cache-status
+EOF
+
+
+
+============== 4.4 ==============
+
+
+
+
+cd Lastname_network_02/scenario_4_DNS
+
+cat > named.conf.local <<'EOF'
+zone "example.local" {
+  type master;
+  file "/etc/bind/db.example.local";
+};
+EOF
+
+cat > db.example.local <<'EOF'
+$TTL 604800
+@   IN  SOA ns1.example.local. admin.example.local. (
+        3       ; Serial
+        604800  ; Refresh
+        86400   ; Retry
+        2419200 ; Expire
+        604800 ) ; Negative Cache TTL
+
+@   IN  NS  ns1.example.local.
+@   IN  A   192.168.1.10
+www IN  A   192.168.1.10
+ftp IN  A   192.168.1.30
+mail IN  A   192.168.1.20
+@   IN  MX  10 mail.example.local.
+ns1 IN  A   192.168.1.53
+EOF
+
+cat > bind_explanation.txt <<'EOF'
+BIND files (simple)
+
+named.conf.local:
+- defines a zone: example.local
+- says where the zone file is
+
+db.example.local:
+- zone file content
+- has SOA, NS, A, MX records
+
+SOA:
+- has serial and timing values for the zone
+EOF
+
+
+
+################### 5 #############
+
+cd Lastname_network_02/scenario_5_SSH
+
+cat > ssh_keys_guide.txt <<'EOF'
+SSH keys (simple)
+
+Make RSA 2048 key:
+  ssh-keygen -t rsa -b 2048 -f ~/.ssh/mykey -N ""
+
+Public key file:
+  ~/.ssh/mykey.pub
+
+Copy public key to server:
+  ssh-copy-id -i ~/.ssh/mykey.pub user@server
+
+Passwordless login idea:
+- server keeps your public key in: ~/.ssh/authorized_keys
+- you prove you own the private key when you connect
+EOF
+
+cat > ssh_config_sample <<'EOF'
+Host myserver
+  HostName 192.168.1.10
+  User admin
+  IdentityFile ~/.ssh/mykey
+  Port 22
+EOF
+
+cat > ssh_tunneling_guide.md <<'EOF'
+SSH tunneling (simple)
+
+1) Local port forwarding
+Command:
+  ssh -L 8080:localhost:80 user@server
+Use case:
+- You want to open a website on the server (port 80) from your own laptop (localhost:8080).
+
+2) Remote port forwarding
+Command:
+  ssh -R 9000:localhost:3000 user@server
+Use case:
+- You run an app on your laptop (port 3000) and you want server users to reach it via server:9000.
+
+3) Dynamic port forwarding (SOCKS proxy)
+Command:
+  ssh -D 1080 user@server
+Use case:
+- You need a simple proxy tunnel for browsing/testing through the server.
+EOF
+
+cat > sshd_config_hardened <<'EOF'
+# sshd hardening sample (simple)
+# This is a sample. Real servers need testing before applying.
+
+Port 2222
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+MaxAuthTries 3
+EOF
+
+cat > ssh_security_guide.txt <<'EOF'
+SSH security (simple)
+
+What to change:
+- Change port (example 2222)
+- Disable root login
+- Disable password login (use keys)
+- Limit auth tries
+
+Why disable PasswordAuthentication:
+- Password can be guessed/brute-forced.
+- Keys are safer when protected.
+
+Why disable root login:
+- Attackers always try "root".
+- Use a normal user + sudo.
+
+How to monitor failed logins:
+  grep "Failed password" /var/log/auth.log | tail -n 20
+EOF
+
+echo "OK: Scenario 5 files written"
+ls -la
+
+
+
+################# 6 ####################
+
+
+cd Lastname_network_02/scenario_6_Monitoring
+
+cat > network_monitor.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+
+
+echo "Start monitoring..." 
+echo "Log file: monitoring_log.txt"
+
+while true
+do
+  echo "-----" >> monitoring_log.txt
+  date >> monitoring_log.txt
+
+  echo "Interfaces:" >> monitoring_log.txt
+  ip -br addr >> monitoring_log.txt 2>&1 || true
+
+  echo "Open ports:" >> monitoring_log.txt
+  ss -lntu >> monitoring_log.txt 2>&1 || true
+
+  echo "Active connections (short list):" >> monitoring_log.txt
+  ss -ntu | head -n 25 >> monitoring_log.txt 2>&1 || true
+
+  echo "DNS config:" >> monitoring_log.txt
+  cat /etc/resolv.conf >> monitoring_log.txt 2>&1 || true
+
+  echo "" >> monitoring_log.txt
+  sleep 5
+done
+EOF
+
+chmod +x network_monitor.sh
+
+cat > analyze_logs.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+
+
+echo "Log analysis report" > log_analysis_report.txt
+date >> log_analysis_report.txt
+echo "" >> log_analysis_report.txt
+
+echo "Auth log (last 50 lines):" >> log_analysis_report.txt
+if [ -f /var/log/auth.log ]; then
+  tail -n 50 /var/log/auth.log >> log_analysis_report.txt
+else
+  echo "No /var/log/auth.log found" >> log_analysis_report.txt
+fi
+
+echo "" >> log_analysis_report.txt
+echo "Failed password lines (last 20):" >> log_analysis_report.txt
+if [ -f /var/log/auth.log ]; then
+  grep "Failed password" /var/log/auth.log | tail -n 20 >> log_analysis_report.txt || true
+else
+  echo "No auth.log to grep" >> log_analysis_report.txt
+fi
+
+echo "" >> log_analysis_report.txt
+echo "Syslog (last 50 lines):" >> log_analysis_report.txt
+if [ -f /var/log/syslog ]; then
+  tail -n 50 /var/log/syslog >> log_analysis_report.txt
+else
+  echo "No /var/log/syslog found" >> log_analysis_report.txt
+fi
+
+echo "" >> log_analysis_report.txt
+echo "Done" >> log_analysis_report.txt
+EOF
+
+chmod +x analyze_logs.sh
+
+cat > dashboard.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+
+while true
+do
+  clear
+  echo "Network dashboard"
+  echo ""
+  echo "[IP]"
+  ip -br addr || true
+  echo ""
+  echo "[Routes]"
+  ip route || true
+  echo ""
+  echo "[Listening ports]"
+  ss -lntu || true
+  echo ""
+  echo "[Active connections]"
+  ss -ntu | head -n 25 || true
+  echo ""
+  echo "[DNS]"
+  cat /etc/resolv.conf || true
+  echo ""
+  echo "Refresh in 5s (Ctrl+C to stop)"
+  sleep 5
+done
+EOF
+
+chmod +x dashboard.sh
+
+cat > dashboard_screenshot.txt <<'EOF'
+Dashboard screenshot note (simple)
+
+Run:
+  bash dashboard.sh
+
+Take a screenshot of the dashboard screen.
+
+If no screenshot is possible, copy/paste the output.
+EOF
+
+
+ls -la
+
+###################### 7 #########################
+
+
+
+cd Lastname_network_02/scenario_7_Troubleshooting
+
+cat > troubleshoot_website.md <<'EOF'
+# Website unreachable (simple)
+
+1) Check IP and route
+  ip -br addr
+  ip route
+
+2) Check gateway (replace <gateway-ip>)
+  ping -c 3 <gateway-ip>
+
+3) Check DNS
+  dig example.com +short
+  nslookup example.com
+
+4) Check reachability to resolved IP (replace <resolved-ip>)
+  ping -c 3 <resolved-ip>
+  traceroute <resolved-ip>
+
+5) Check HTTP/HTTPS
+  curl -I http://example.com
+  curl -Ik https://example.com
+
+6) If this is your server
+  ss -lntu
+  sudo systemctl status nginx
+  sudo systemctl status apache2
+  sudo ufw status
+EOF
+
+cat > diagnose_slow_network.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+echo "Network performance diagnosis" > network_performance_diagnosis.txt
+date >> network_performance_diagnosis.txt
+echo "" >> network_performance_diagnosis.txt
+
+echo "Ping 8.8.8.8 (10)" >> network_performance_diagnosis.txt
+ping -c 10 8.8.8.8 >> network_performance_diagnosis.txt 2>&1 || true
+echo "" >> network_performance_diagnosis.txt
+
+echo "Ping 1.1.1.1 (10)" >> network_performance_diagnosis.txt
+ping -c 10 1.1.1.1 >> network_performance_diagnosis.txt 2>&1 || true
+echo "" >> network_performance_diagnosis.txt
+
+echo "DNS test (dig google.com)" >> network_performance_diagnosis.txt
+if command -v dig >/dev/null 2>&1; then
+  dig google.com >> network_performance_diagnosis.txt 2>&1 || true
+else
+  echo "dig not found: sudo apt install dnsutils" >> network_performance_diagnosis.txt
+fi
+echo "" >> network_performance_diagnosis.txt
+
+echo "Routes" >> network_performance_diagnosis.txt
+ip route >> network_performance_diagnosis.txt 2>&1 || true
+echo "" >> network_performance_diagnosis.txt
+
+echo "Interfaces" >> network_performance_diagnosis.txt
+ip -br addr >> network_performance_diagnosis.txt 2>&1 || true
+echo "" >> network_performance_diagnosis.txt
+
+echo "MTU quick check (may fail)" >> network_performance_diagnosis.txt
+ping -c 2 -M do -s 1472 8.8.8.8 >> network_performance_diagnosis.txt 2>&1 || true
+echo "" >> network_performance_diagnosis.txt
+
+echo "Traceroute 8.8.8.8 (if available)" >> network_performance_diagnosis.txt
+if command -v traceroute >/dev/null 2>&1; then
+  traceroute -m 10 8.8.8.8 >> network_performance_diagnosis.txt 2>&1 || true
+else
+  echo "traceroute not found: sudo apt install traceroute" >> network_performance_diagnosis.txt
+fi
+echo "" >> network_performance_diagnosis.txt
+
+echo "Done" >> network_performance_diagnosis.txt
+EOF
+
+chmod +x diagnose_slow_network.sh
+
+cat > timeout_troubleshooting.md <<'EOF'
+# SSH timeout (simple)
+
+Common reasons
+- wrong IP or wrong port
+- firewall blocks the port
+- server down
+- routing/VPN/NAT issues
+- DNS points to wrong IP
+
+Quick checks (replace <ip>)
+  dig server.example.com +short
+  nc -zv -w 5 <ip> 22
+  traceroute <ip>
+  ssh -o ConnectTimeout=5 user@<ip>
+
+If you control the server
+  ss -lntu | grep :22
+  sudo systemctl status ssh
+  tail -n 50 /var/log/auth.log
+EOF
+
+cat > timeout_test.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+echo "Timeout test"
+
+echo "Port test (10.255.255.1:22)"
+if command -v nc >/dev/null 2>&1; then
+  nc -zv -w 5 10.255.255.1 22 || true
+else
+  echo "nc not found: sudo apt install netcat-openbsd"
+fi
+
+echo "SSH timeout test"
+timeout 5 ssh -o ConnectTimeout=5 user@10.255.255.1 2>/dev/null || true
+
+echo "Done"
+EOF
+
+chmod +x timeout_test.sh
+
+
+ls -la
+
+
+
+
+
+
+
+
+
+

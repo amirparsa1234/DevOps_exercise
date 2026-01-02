@@ -1,0 +1,20 @@
+FTP commands
+
+Connect:
+  ftp <server-ip>
+
+List:
+  ls
+
+Download:
+  get file.txt
+
+Upload (need permission):
+  put file.txt
+
+Public example:
+  ftp ftp.ubuntu.com
+
+No interactive:
+  wget ftp://ftp.ubuntu.com/ubuntu/README
+  curl ftp://ftp.ubuntu.com/ubuntu/README -o README

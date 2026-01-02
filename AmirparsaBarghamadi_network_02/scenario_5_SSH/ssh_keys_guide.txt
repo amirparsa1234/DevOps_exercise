@@ -1,0 +1,14 @@
+SSH keys
+
+Make RSA 2048 key:
+  ssh-keygen -t rsa -b 2048 -f ~/.ssh/mykey -N ""
+
+Public key file:
+  ~/.ssh/mykey.pub
+
+Copy public key to server:
+  ssh-copy-id -i ~/.ssh/mykey.pub user@server
+
+Passwordless login idea:
+- server keeps your public key in: ~/.ssh/authorized_keys
+- you prove you own the private key when you connect
